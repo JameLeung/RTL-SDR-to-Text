@@ -33,10 +33,9 @@ Here is my finding,
 
 ## File Description
 
-load.sh Start the virtual device
-
-fm-finale.py  Sensevoice best model
-
-fm-finale-wenet.py Wenet model 
+1. load.sh     -  Start the virtual device
+2. fm-finale.py      -  Sensevoice best model
+3. fm-finale-wenet.py     -  Wenet model
+4. fm-finale.py     -   Sensevoice model with longer text captured - slightly more time delay
 
 
