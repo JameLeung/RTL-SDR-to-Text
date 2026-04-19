@@ -11,15 +11,34 @@ from opencc import OpenCC
 cc = OpenCC('s2hk')
 
 # 2. 初始化優化：強制關閉所有不必要的偵測
-print("正在啟動超高速繁體模式...")
-model = AutoModel(
-    model="iic/SenseVoiceSmall",
-    device="cpu", 
-    trust_remote_code=True,
-    disable_update=True,
-    # 如果你的 CPU 支援，可以嘗試增加線程數（例如 4）
-    # torch_config={"intra_op_num_threads": 4} 
-)
+
+#MODEL_ID = "FunAudioLLM/SenseVoiceSmall"
+#FunAudioLLM/SenseVoiceSmall
+#model = AutoModel(
+#    model=MODEL_ID,
+#    device="cpu",
+#    trust_remote_code=True,
+#    disable_update=True,
+#    hub="hf"          # ← 必須加上這行
+#)
+
+MODEL_ID = "iic/SenseVoiceSmall"
+
+try:
+    model = AutoModel(
+        model=MODEL_ID,
+        device="cpu",
+        trust_remote_code=True,
+        disable_update=True,
+        # 如果你的 CPU 支援，可以嘗試增加線程數（例如 4）
+        torch_config={"intra_op_num_threads": 4}
+    )
+    print(">>> SenseVoiceSmall 載入成功！")
+except Exception as e:
+    print(f"\n[錯誤] 無法從 ModelScope 下載 SenseVoiceSmall 模型。")
+    print(f"請嘗試手動安裝指令: pip install -U modelscope funasr")
+    print(f"報錯詳情: {e}")
+    sys.exit(1)
 
 stop_event = threading.Event()
 
@@ -72,10 +91,9 @@ def decode_thread():
             if res:
                 # 1. 快速移除標籤
                 raw_text = tag_pattern.sub('', res[0]['text']).strip()
-                
                 # 2. 極速繁體轉換
-                trad_text = cc.convert(raw_text)
-                
+                trad_text = cc.convert(raw_text).rstrip('。')
+
                 t_end = time.perf_counter()
                 latency = t_end - t_start
 

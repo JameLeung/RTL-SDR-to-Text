@@ -4,7 +4,7 @@ import numpy as np
 import threading
 import time
 import sys
-import os
+import re
 from funasr import AutoModel
 from opencc import OpenCC
 
@@ -54,11 +54,14 @@ def decode_thread():
     cmd = ["parec", "--format=s16le", "--rate=16000", "--channels=1", "--device=rtl_fm_sink.monitor"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     
+    chunk_duration = 2
     sample_rate = 16000
-    chunk_duration = 3.5 # Paraformer 在 3-4 秒的區塊表現最穩定
-    chunk_size = int(sample_rate * 2 * chunk_duration) 
+    chunk_size = sample_rate * 2 * chunk_duration
 
-    print(f"--- 實時廣東話辨識中 (WenetSpeech-Yue) ---")
+    # 預編譯正則，只保留內容
+    tag_pattern = re.compile(r'<\|.*?\|>')
+
+    print(f"--- 實時繁體辨識開始 (目標延遲: 0.1s-0.2s) ---")
 
     try:
         while not stop_event.is_set():
@@ -69,24 +72,34 @@ def decode_thread():
             audio_np = np.frombuffer(raw_audio, dtype=np.int16).astype(np.float32) / 32768.0
             
             # 執行辨識
+            #res = model.generate(
+            #    input=audio_np,
+            #    batch_size_s=300,
+            #    is_final=True
+            #)
             res = model.generate(
                 input=audio_np,
-                batch_size_s=300,
-                is_final=True
+                cache={},
+                language="yue",
+                use_itn=True,
+                disable_pbar=True
             )
 
-            if res and len(res) > 0:
-                raw_text = res[0]['text'].strip()
-                if raw_text:
-                    trad_text = cc.convert(raw_text)
-                    latency = time.perf_counter() - t_start
-                    
-                    color = "\033[92m" if latency < 0.7 else "\033[93m"
+            if res:
+                # 1. 快速移除標籤
+                raw_text = tag_pattern.sub('', res[0]['text']).strip()
+                # 2. 極速繁體轉換
+                trad_text = cc.convert(raw_text).rstrip('。')
+
+                t_end = time.perf_counter()
+                latency = t_end - t_start
+
+                if trad_text:
+                    # 使用顏色標記延遲，方便觀察
+                    color = "\033[92m" if latency < 0.2 else "\033[93m"
                     reset = "\033[0m"
-                    
-                    sys.stdout.write(f"\r\033[K[廣東話]: {trad_text} | {color}延遲: {latency:.2f}s{reset}")
+                    sys.stdout.write(f"\r[廣東話]: {trad_text:<30} | {color}延遲: {latency:.3f}s{reset}\n")
                     sys.stdout.flush()
-                    if len(trad_text) > 15: print()
 
     finally:
         proc.terminate()
