@@ -1,4 +1,4 @@
-# RTL-SDR-to-Text
+# RTL-SDR-to-Text (STT testing script on English/Cantonese/Mandarin detection)
 
 This model is to capture the voice from the device RTL-SDR v4 and generate cantonese text on screen.
 
