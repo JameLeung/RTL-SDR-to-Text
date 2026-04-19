@@ -1,41 +1,31 @@
-# RTL-SDR-to-Text (STT testing script on English/Cantonese/Mandarin detection)
+# RTL-SDR-to-Text (STT Testing Script for English/Cantonese/Mandarin)
 
-This model is to capture the voice from the device RTL-SDR v4 and generate cantonese text on screen.
+This project captures live audio from an RTL-SDR v4 dongle and performs real-time speech-to-text (STT) conversion to Cantonese (with support for English/Mandarin).
+Feel free to modify the code as you wish.
+Prerequisites
 
-You may take free will to chaneg the code, with your imagination.
+## RTL-SDR v4 USB dongle (available on Amazon or Taobao)
+Installed drivers, rtl-fm, and GQRX (for testing)
 
-## Pre-Procedure needed
-RTL-SDR v4 USB token = can procure from Amazon or Taobao
+## Tested Platforms
 
-Installed with device driver, rtl-fm and gqrx for testing
+HKOS 42
+Fedora 43
+Ubuntu 22.04.4
 
-## Tested Platform 
-* HKOS 42
+## How It Works
+The script pipes audio from rtl-fm to a virtual audio device. A separate thread decodes the stream using Whisper, WeNet, or SenseVoice.
+Performance comparison:
 
-* Fedora 43
+Whisper (full): 2–3 s (removed – too slow)
+WeNet: 1–2 s
+SenseVoice Small: 0.2–0.3 s (recommended)
 
-* UBuntu 22.04.4
+## Files
 
-Don't ask me why I don't test in Windows. I just don't like it.
-
-## Description of Works
-The program is to output the virtual device via rtl-fm, creating the virtual device to capture and use another thread to decode it using Whisper or Sensevoice.
-
-Tried and ofudn the Sensevoice is much faster.
-
-Here is my finding,
-
-* Whisper Full 2-3s (deleted as it was too slow)
-
-* Wenet 1-2 s
-
-* Sensevoice Small 0.2-0.3s
-
-## File Description
-
-1. load.sh     -  Start the virtual device
-2. fm-finale.py      -  Sensevoice best model
-3. fm-finale-wenet.py     -  Wenet model
+load.sh – Starts the virtual audio device
+fm-finale.py – Best model (SenseVoice)
+fm-finale-wenet.py – WeNet model
 4. fm-finale.py     -   Sensevoice model with longer text captured - slightly more time delay
 
 
