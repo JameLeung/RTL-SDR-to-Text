@@ -18,14 +18,14 @@ The script pipes audio from rtl-fm to a virtual audio device. A separate thread 
 Performance comparison:
 
 Whisper (full): 2–3 s (removed – too slow)
-WeNet: 1–2 s
+WeNet: 0.4 - 0.6 s
 SenseVoice Small: 0.2–0.3 s (recommended)
 
 ## Files
 
-load.sh – Starts the virtual audio device
-fm-finale.py – Best model (SenseVoice)
-fm-finale-wenet.py – WeNet model
+1. load.sh – Starts the virtual audio device in the Linux 
+2. fm-finale.py – Best model (SenseVoice)
+3. fm-finale-wenet.py – WeNet model
 4. fm-finale.py     -   Sensevoice model with longer text captured - slightly more time delay
 
 
